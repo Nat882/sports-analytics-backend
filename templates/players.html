@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+  <title>NBA Players Stats - Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='players.css') }}">
+  <style>
+    
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <ul class="navbar-menu">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('games') }}">Games</a></li>
+        <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
+        <li><a href="{{ url_for('stats') }}">Stats</a></li>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <h1 style="text-align: center;">NBA Players Stats - Season {{ season }}</h1>
+
+  <!-- Search Form -->
+  <form method="GET" action="{{ url_for('players_page') }}" style="text-align: center; margin-bottom: 20px;">
+    <input type="text" name="q" placeholder="Search for a player" value="{{ query }}" style="padding: 10px; width: 300px;">
+    <button type="submit" style="padding: 10px;">Search</button>
+  </form>
+
+  <!-- Comparison Form with Players Table -->
+  <form id="compareForm" method="GET" action="{{ url_for('compare_players') }}">
+    <table>
+      <thead>
+        <tr>
+          <th>Select</th>
+          <th>Player Name</th>
+          <th>Team</th>
+          <th>Position</th>
+          <th>GP</th>
+          <th>PTS</th>
+          <th>REB</th>
+          <th>AST</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in players %}
+          <tr>
+            <!-- Include a checkbox with the player's unique ID (PLAYER_ID) -->
+            <td><input type="checkbox" name="player_ids" value="{{ player['PLAYER_ID'] }}"></td>
+            <td>{{ player['PLAYER_NAME'] }}</td>
+            <td>{{ player['TEAM_NAME'] }}</td>
+            <td>{{ player['PLAYER_POSITION'] }}</td>
+            <td>{{ player['GP'] }}</td>
+            <td>{{ player['PTS'] }}</td>
+            <td>{{ player['REB'] }}</td>
+            <td>{{ player['AST'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <!-- The Compare button is disabled until exactly two checkboxes are selected -->
+    <button type="submit" id="compareButton" disabled>Compare Selected Players</button>
+  </form>
+
+  <script>
+    // JavaScript: Enable the Compare button only when exactly 2 players are selected
+    const checkboxes = document.querySelectorAll('input[name="player_ids"]');
+    const compareButton = document.getElementById('compareButton');
+
+    checkboxes.forEach(chk => {
+      chk.addEventListener('change', () => {
+        const selected = document.querySelectorAll('input[name="player_ids"]:checked');
+        compareButton.disabled = (selected.length !== 2);
+      });
+    });
+  </script>
+
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

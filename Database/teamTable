@@ -1,0 +1,6 @@
+CREATE TABLE Teams (
+    team_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    city VARCHAR(100),
+    ...
+);

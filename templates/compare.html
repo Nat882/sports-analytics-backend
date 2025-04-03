@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <title>Player Comparison - Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='compare.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    #playerComparisonChart,
+    #radarChart {
+      max-width: 800px;
+      margin: 30px auto;
+      display: none;
+    }
+
+    .chart-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .comparison-container {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px auto;
+      width: 90%;
+      flex-wrap: wrap;
+    }
+
+    .player-card {
+      border: 1px solid #ccc;
+      padding: 20px;
+      background-color: #fff;
+      width: 45%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    .player-card h2 {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .player-card p {
+      font-size: 16px;
+      margin: 8px 0;
+    }
+
+    .label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <ul class="navbar-menu">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('games') }}">Games</a></li>
+        <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
+        <li><a href="{{ url_for('stats') }}">Stats</a></li>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <h1 style="text-align: center;">Player Comparison - Season {{ season }}</h1>
+
+  <!-- Player Info Cards -->
+  <div class="comparison-container">
+    {% for player in players %}
+      <div class="player-card">
+        <h2>{{ player['PLAYER_NAME'] }}</h2>
+        <p><span class="label">Team:</span> {{ player['TEAM_NAME'] }}</p>
+        <p><span class="label">Position:</span> {{ player['PLAYER_POSITION'] }}</p>
+        <p><span class="label">Games Played:</span> {{ player['GP'] }}</p>
+        <p><span class="label">Points per Game:</span> {{ player['PTS'] }}</p>
+        <p><span class="label">Rebounds per Game:</span> {{ player['REB'] }}</p>
+        <p><span class="label">Assists per Game:</span> {{ player['AST'] }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Chart Type Selector -->
+  <div class="chart-container">
+    <label for="chartType">Select Chart Type:</label>
+    <select id="chartType">
+      <option value="bar">Bar Chart</option>
+      <option value="radar">Radar Chart</option>
+    </select>
+  </div>
+
+  <!-- Chart Canvases -->
+  <canvas id="playerComparisonChart"></canvas>
+  <canvas id="radarChart"></canvas>
+
+  <!-- Include Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Pass player data to JS -->
+  <script>
+    var playersData = {{ players|tojson|safe }};
+  </script>
+
+  <!-- Chart rendering logic -->
+  <script src="{{ url_for('static', filename='compare_chart.js') }}"></script>
+
+  <!-- Chart switcher -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const chartTypeSelector = document.getElementById('chartType');
+      const barChart = document.getElementById('playerComparisonChart');
+      const radarChart = document.getElementById('radarChart');
+
+      // Show default chart
+      barChart.style.display = 'block';
+
+      chartTypeSelector.addEventListener('change', function () {
+        const selected = chartTypeSelector.value;
+        barChart.style.display = selected === 'bar' ? 'block' : 'none';
+        radarChart.style.display = selected === 'radar' ? 'block' : 'none';
+      });
+    });
+  </script>
+
+  <!-- Optional main.js -->
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+
+</body>
+</html>
