@@ -101,7 +101,7 @@
   <!-- Pass player data to JS -->
   <script>
     var playersData = {{ players|tojson|safe }};
-  </script>
+  </script>  
 
   <!-- Chart rendering logic -->
   <script src="{{ url_for('static', filename='compare_chart.js') }}"></script>
