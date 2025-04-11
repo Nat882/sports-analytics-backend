@@ -5,95 +5,70 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-
-  <!doctype html>
-  <html>
-  <head>
-    <title>NBA Info</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  </head>
-  <body>
-    <nav class="navbar">
-      <div class="navbar-container">
-        <ul class="navbar-menu">
-          <li><a href="{{ url_for('index') }}">Home</a></li>
-          <li><a href="{{ url_for('games') }}">Games</a></li>
-          <li><a href="{{ url_for('players_page') }}">Players</a></li>
-          <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
-          <li><a href="{{ url_for('stats') }}">Stats</a></li>
-          <li><a href="{{ url_for('login') }}">Login</a></li>
-        </ul>
-      </div>
-    </nav>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <ul class="navbar-menu">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('games_page') }}">Games</a></li>
+        <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
+        <li><a href="{{ url_for('stats') }}">Stats</a></li>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+      </ul>
+    </div>
+  </nav>
   
-    <!-- Your page content goes here -->
-    
-    <script src="{{ url_for('static', filename='main.js') }}"></script>
-  </body>
-  </html>
-  
-
   <h1>Today's NBA Games</h1>
   <ul id="games-list">
-    <h2>Box scores</h2>
     {% if games %}
       {% for game in games %}
-        <li class="game-card">
-          <div class="game-header">
-            <div class="teams">
-                <span class="team away-team">
-                <img src="{{ game.AWAY_TEAM_LOGO }}" alt="{{ game.AWAY_TEAM_NAME }} Logo" class="team-logo">
-                {{ game.AWAY_TEAM_NAME }}
-                </span>
-                <span>vs.</span>
-                <span class="team home-team">
-                <img src="{{ game.HOME_TEAM_LOGO }}" alt="{{ game.HOME_TEAM_NAME }} Logo" class="team-logo">
-                {{ game.HOME_TEAM_NAME }}
-                </span>
-            </div>
-  
-            <div class="game-info">
-              <span class="status">{{ game.GAME_STATUS_TEXT }}</span>
-              {# Optionally add game time if available #}
-              {% if game.GAME_TIME_EST %}
-                <span class="time">{{ game.GAME_TIME_EST }}</span>
-              {% endif %}
+      <li class="game-card">
+        <div class="game-row">
+          <!-- Away team -->
+          <div class="team away-team">
+            <img src="{{ game.AWAY_TEAM_LOGO }}" 
+                 alt="{{ game.AWAY_TEAM_NAME }} Logo" 
+                 class="team-logo">
+            <span class="team-name">{{ game.AWAY_TEAM_NAME }}</span>
+          </div>
+      
+          <!-- Scoreboard container -->
+          <div class="scoreboard-container">
+            <div class="score-label">Box Score</div>
+            <div class="scoreboard">
+              <span class="away-score">
+                {{ (game.AWAY_TEAM_SCORE if game.AWAY_TEAM_SCORE is not none and game.AWAY_TEAM_SCORE == game.AWAY_TEAM_SCORE else 0)|int }}
+              </span>
+              <span class="score-separator">-</span>
+              <span class="home-score">
+                {{ (game.HOME_TEAM_SCORE if game.HOME_TEAM_SCORE is not none and game.HOME_TEAM_SCORE == game.HOME_TEAM_SCORE else 0)|int }}
+              </span>
             </div>
           </div>
-
-          {% if game.team_stats %}
-          <div class="box-score">
-            <h4>Box Score</h4>
-            <table>
-              <thead>
-                <tr>
-                  <th>Team</th>
-                  <th>Points</th>
-                  <th>Rebounds</th>
-                  <th>Assists</th>
-                  <!-- Add more stats as needed -->
-                </tr>
-              </thead>
-              <tbody>
-                {% for team in game.team_stats %}
-                <tr>
-                  <td>{{ team.TEAM_ABBREVIATION }}</td>
-                  <td>{{ team.PTS }}</td>
-                  <td>{{ team.REB }}</td>
-                  <td>{{ team.AST }}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+      
+          <!-- Home team -->
+          <div class="team home-team">
+            <img src="{{ game.HOME_TEAM_LOGO }}" 
+                 alt="{{ game.HOME_TEAM_NAME }} Logo" 
+                 class="team-logo">
+            <span class="team-name">{{ game.HOME_TEAM_NAME }}</span>
           </div>
+        </div>
+        
+        <!-- Game status/time below the game row -->
+        <div class="game-info">
+          <span class="status">{{ game.GAME_STATUS_TEXT }}</span>
+          {% if game.GAME_TIME_EST %}
+            <span class="time">{{ game.GAME_TIME_EST }}</span>
           {% endif %}
-        </li>
+        </div>
+      </li>
       {% endfor %}
     {% else %}
       <p>No games found for today.</p>
     {% endif %}
   </ul>
-
+  
   <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>

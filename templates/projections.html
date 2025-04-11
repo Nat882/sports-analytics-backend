@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Player Projections - Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    table {
+      width: 95%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <ul class="navbar-menu">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('games_page') }}">Games</a></li>
+        <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
+        <li><a href="{{ url_for('stats') }}">Stats</a></li>
+        <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <h1>Projected Player Totals - Season {{ season }}</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>Team</th>
+        <th>GP</th>
+        <th>Projected Points</th>
+        <th>Projected Rebounds</th>
+        <th>Projected Assists</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for player in players %}
+      <tr>
+        <td>{{ player['PLAYER_NAME'] }}</td>
+        <td>{{ player['TEAM_ABBREVIATION'] }}</td>
+        <td>{{ player['GP'] }}</td>
+        <td>{{ player['PROJECTED_PTS'] }}</td>
+        <td>{{ player['PROJECTED_REB'] }}</td>
+        <td>{{ player['PROJECTED_AST'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+</html>

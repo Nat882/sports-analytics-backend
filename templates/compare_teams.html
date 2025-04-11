@@ -1,0 +1,49 @@
+<h1 style="text-align: center;">Team Comparison - Season {{ season }}</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='compare_team.css') }}">
+
+<div class="comparison-container">
+  {% for team in teams %}
+  <div class="player-card">
+    <h2>
+      {% if team.LOGO %}
+        <img src="{{ team.LOGO }}" width="50">
+      {% endif %}
+      {{ team['TEAM_NAME'] }}
+    </h2>
+    <p><span class="label">Wins:</span> {{ team['W'] }}</p>
+    <p><span class="label">Losses:</span> {{ team['L'] }}</p>
+    <p><span class="label">PTS:</span> {{ team['PTS'] }}</p>
+    <p><span class="label">REB:</span> {{ team['REB'] }}</p>
+    <p><span class="label">AST:</span> {{ team['AST'] }}</p>
+    <p><span class="label">TOV:</span> {{ team['TOV'] }}</p>
+    <p><span class="label">STL:</span> {{ team['STL'] }}</p>
+    <p><span class="label">BLK:</span> {{ team['BLK'] }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="chart-container">
+    <label for="chartType">Select Chart Type:</label>
+    <select id="chartType">
+      <option value="bar">Stacked Bar</option>
+      <option value="radar">Radar</option>
+      <option value="doughnut">Doughnut</option>
+    </select>
+  </div>
+  
+  <!-- Canvases -->
+  <canvas id="teamComparisonChart"></canvas>
+  <canvas id="radarChart"></canvas>
+  
+  <!-- Doughnut chart container -->
+  <div id="doughnutContainer" style="display: none; justify-content: space-around; margin-top: 20px;">
+    <canvas id="team1Doughnut" width="300" height="300"></canvas>
+    <canvas id="team2Doughnut" width="300" height="300"></canvas>
+  </div>
+
+<script>
+  const teamData = {{ teams|tojson|safe }};
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='compare_teams_chart.js') }}"></script>

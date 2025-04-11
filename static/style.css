@@ -133,3 +133,100 @@ body {
     height: 20px;
     margin-right: 5px;
   }
+
+  /* Container row for each game: away | scoreboard | home */
+.game-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* Team section (away or home) */
+.team {
+  display: flex;
+  align-items: center;
+}
+
+.team-name {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* Scoreboard in the center */
+.scoreboard {
+  display: flex;
+  align-items: center;
+  font-size: 1.5em;
+  
+  margin: 0 10px;
+}
+
+.away-score,
+.home-score {
+  margin: 0 5px;
+}
+
+.score-separator {
+  margin: 0 5px;
+  font-weight: normal;
+  color: #333;
+}
+
+/* Adjust logo sizes if you want them bigger or smaller */
+.team-logo {
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+}
+
+/* Additional style for game-info (status/time) */
+.game-info {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px;
+}
+
+.score-label {
+  font-size: 1em;
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Container for the scoreboard and its label */
+.scoreboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Score label styling */
+.score-label {
+  font-size: 1em;
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+/* Scoreboard styling */
+.scoreboard {
+  display: flex;
+  align-items: center;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* Style for scores and separator */
+.away-score,
+.home-score {
+  margin: 0 5px;
+}
+.score-separator {
+  margin: 0 5px;
+  font-weight: normal;
+  color: #333;
+}

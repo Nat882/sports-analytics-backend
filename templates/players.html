@@ -13,8 +13,9 @@
     <div class="navbar-container">
       <ul class="navbar-menu">
         <li><a href="{{ url_for('index') }}">Home</a></li>
-        <li><a href="{{ url_for('games') }}">Games</a></li>
+        <li><a href="{{ url_for('games_page') }}">Games</a></li>
         <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
         <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
         <li><a href="{{ url_for('stats') }}">Stats</a></li>
         <li><a href="{{ url_for('login') }}">Login</a></li>
@@ -43,6 +44,10 @@
           <th>PTS</th>
           <th>REB</th>
           <th>AST</th>
+          <th>STL</th>
+          <th>BLK</th>
+          <th>TOV</th>
+          <th>FG%</th>
         </tr>
       </thead>
       <tbody>
@@ -57,6 +62,10 @@
             <td>{{ player['PTS'] }}</td>
             <td>{{ player['REB'] }}</td>
             <td>{{ player['AST'] }}</td>
+            <td>{{ player['STL'] }}</td>
+            <td>{{ player['BLK'] }}</td>
+            <td>{{ player['TOV'] }}</td>
+            <td>{{ player['FG_PCT'] }}</td>
           </tr>
         {% endfor %}
       </tbody>

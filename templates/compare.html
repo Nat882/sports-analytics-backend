@@ -56,8 +56,9 @@
     <div class="navbar-container">
       <ul class="navbar-menu">
         <li><a href="{{ url_for('index') }}">Home</a></li>
-        <li><a href="{{ url_for('games') }}">Games</a></li>
+        <li><a href="{{ url_for('games_page') }}">Games</a></li>
         <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
         <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
         <li><a href="{{ url_for('stats') }}">Stats</a></li>
         <li><a href="{{ url_for('login') }}">Login</a></li>
@@ -88,12 +89,15 @@
     <select id="chartType">
       <option value="bar">Bar Chart</option>
       <option value="radar">Radar Chart</option>
+      <option value="line"Line Chart></option>
+
     </select>
   </div>
 
   <!-- Chart Canvases -->
   <canvas id="playerComparisonChart"></canvas>
   <canvas id="radarChart"></canvas>
+  <canvas id="lineChart"></canvas>
 
   <!-- Include Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
