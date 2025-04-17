@@ -9,9 +9,11 @@ from nba_api.stats.static import teams
 from nba_api.stats.library.http import NBAStatsHTTP
 from requests.exceptions import ReadTimeout
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from models import db, User, FavoritePlayer, FavoriteTeam
 from team_logos import team_logos
+
 import datetime
+import json
 
 # Update headers to avoid NBA API blocking
 NBAStatsHTTP.headers.update({
@@ -35,7 +37,6 @@ def get_current_season():
     now = datetime.datetime.now()
     return f"{now.year}-{str(now.year + 1)[-2:]}" if now.month >= 10 else f"{now.year - 1}-{str(now.year)[-2:]}"
 
-
 # ---------- ROUTES ----------
 
 @app.route('/')
@@ -58,11 +59,9 @@ def index():
         games = []
     return render_template('index.html', games=games)
 
-
 @app.route('/games')
 def games_page():
     return render_template('games.html')
-
 
 @app.route('/players')
 def players_page():
@@ -95,7 +94,6 @@ def players_page():
 
     return render_template('players.html', players=player_stats, query=query, season=season)
 
-
 @app.route('/players/compare')
 def compare_players():
     player_ids = request.args.getlist('player_ids')
@@ -119,6 +117,39 @@ def compare_players():
 
     return render_template('compare.html', players=selected, season=season)
 
+@app.route('/save_player', methods=['POST'])
+def save_player():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    player_id = request.form.get('player_id')
+    player_name = request.form.get('player_name')
+
+    favorite = FavoritePlayer.query.filter_by(player_id=player_id, user_id=session['user_id']).first()
+    if not favorite:
+        fav = FavoritePlayer(player_id=player_id, player_name=player_name, user_id=session['user_id'])
+        db.session.add(fav)
+        db.session.commit()
+        flash(f"{player_name} added to favorites!")
+
+    return redirect(url_for('players_page'))
+
+@app.route('/save_team', methods=['POST'])
+def save_team():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    team_id = request.form.get('team_id')
+    team_name = request.form.get('team_name')
+
+    favorite = FavoriteTeam.query.filter_by(team_id=team_id, user_id=session['user_id']).first()
+    if not favorite:
+        fav = FavoriteTeam(team_id=team_id, team_name=team_name, user_id=session['user_id'])
+        db.session.add(fav)
+        db.session.commit()
+        flash(f"{team_name} added to favorites!")
+
+    return redirect(url_for('teams_page'))
 
 @app.route('/projections')
 def projections_page():
@@ -139,23 +170,27 @@ def projections_page():
 
     return render_template('projections.html', players=players, season=season)
 
-
 @app.route('/teams')
 def teams_page():
     season = request.args.get('season', get_current_season())
     try:
-        stats = leaguedashteamstats.LeagueDashTeamStats(season=season, per_mode_detailed='PerGame', timeout=15)
+        stats = leaguedashteamstats.LeagueDashTeamStats(
+            season=season,
+            per_mode_detailed='PerGame',
+            timeout=15
+        )
         df = stats.get_data_frames()[0]
         teams = df.to_dict(orient='records')
-    except ReadTimeout:
-        return render_template('teams.html', teams=[], season=season, all_seasons=[], error="Team stats unavailable.")
+    except (ReadTimeout, json.decoder.JSONDecodeError) as e:
+        print(f"Error fetching team stats: {e}")
+        flash("Could not load team stats. Please try again later.")
+        teams = []
 
     for team in teams:
         team['LOGO'] = team_logos.get(team['TEAM_ID'], '')
 
     all_seasons = [f"{y}-{str(y+1)[-2:]}" for y in range(2015, datetime.datetime.now().year + 1)]
     return render_template('teams.html', teams=teams, season=season, all_seasons=all_seasons)
-
 
 @app.route('/teams/compare')
 def compare_teams():
@@ -177,10 +212,15 @@ def compare_teams():
 
     return render_template('compare_teams.html', teams=selected, season=season)
 
-
 @app.route('/stats')
 def stats():
     return render_template('stats.html')
+
+@app.route('/standings')
+def standings_page():
+    # Fetch standings data from an external API or source
+    standings_data = fetch_standings_data()
+    return render_template('standings.html', standings=standings_data)
 
 
 # ---------- AUTH ----------
@@ -191,7 +231,6 @@ def login():
         identifier = request.form['username']
         password = request.form['password']
         user = User.query.filter((User.username == identifier) | (User.email == identifier)).first()
-
         if user and check_password_hash(user.password, password):
             session['user_id'] = user.id
             session['username'] = user.username
@@ -201,13 +240,11 @@ def login():
             flash('Invalid credentials.')
     return render_template('login.html')
 
-
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Logged out.')
-    return redirect(url_for('login'))
-
+    flash('You have been logged out.')
+    return redirect(url_for('index'))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -215,23 +252,69 @@ def register():
         username = request.form['username']
         email = request.form['email']
         password = generate_password_hash(request.form['password'], method='pbkdf2:sha256')
-
         user_exists = User.query.filter((User.username == username) | (User.email == email)).first()
         if user_exists:
             flash('Username or email already in use.')
             return redirect(url_for('register'))
-
         new_user = User(username=username, email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
-
         flash('Account created! You can now log in.')
         return redirect(url_for('login'))
-
     return render_template('register.html')
 
+@app.route('/account', methods=['GET', 'POST'])
+def account():
+    if 'user_id' not in session:
+        flash('Please log in to view your account.')
+        return redirect(url_for('login'))
 
-# ---------- API ----------
+    selected_type = request.form.get('type', 'player')  # default to players
+    favorite_players = []
+    favorite_teams = []
+    if selected_type == 'player':
+        favorite_players = FavoritePlayer.query.filter_by(user_id=session['user_id']).all()
+    elif selected_type == 'team':
+        favorite_teams = FavoriteTeam.query.filter_by(user_id=session['user_id']).all()
+
+    return render_template(
+        'account.html',
+        selected_type=selected_type,
+        favorite_players=favorite_players,
+        favorite_teams=favorite_teams
+    )
+
+# ---------- NEW API ENDPOINTS FOR FAVORITES ----------
+
+@app.route('/api/player_stats/<int:player_id>')
+def player_stats_api(player_id):
+    season = get_current_season()
+    try:
+        stats = leaguedashplayerstats.LeagueDashPlayerStats(season=season, per_mode_detailed='PerGame', timeout=15)
+        df = stats.get_data_frames()[0]
+        player_data = df[df['PLAYER_ID'] == player_id]
+        if player_data.empty:
+            return jsonify({"error": "No data found for this player"}), 404
+        player_stats = player_data.iloc[0].to_dict()
+        return jsonify(player_stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/team_stats/<int:team_id>')
+def team_stats_api(team_id):
+    season = request.args.get('season', get_current_season())
+    try:
+        stats = leaguedashteamstats.LeagueDashTeamStats(season=season, per_mode_detailed='PerGame', timeout=15)
+        df = stats.get_data_frames()[0]
+        team_data = df[df['TEAM_ID'] == team_id]
+        if team_data.empty:
+            return jsonify({"error": "No data found for this team"}), 404
+        team_stats = team_data.iloc[0].to_dict()
+        return jsonify(team_stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# ---------- API FOR GAMES ----------
 
 @app.route('/api/games')
 def get_games():
@@ -258,7 +341,6 @@ def get_games():
                 game['AWAY_TEAM_SCORE'] = score['PTS']
 
     return jsonify(games=games)
-
 
 # ---------- MAIN ----------
 

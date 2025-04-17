@@ -35,11 +35,20 @@
         <li><a href="{{ url_for('index') }}">Home</a></li>
         <li><a href="{{ url_for('games_page') }}">Games</a></li>
         <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
         <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
         <li><a href="{{ url_for('stats') }}">Stats</a></li>
-        <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
-        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('standings_page') }}">Standings</a></li>
+
+      
+        {% if session.get('user_id') %}
+          <li><a href="{{ url_for('account') }}">Account</a></li>
+          <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}">Login</a></li>
+        {% endif %}
       </ul>
+      
     </div>
   </nav>
 

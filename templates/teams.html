@@ -27,24 +27,41 @@
       text-align: center;
       margin: 30px 0;
     }
+
+    .favorites-form {
+      margin: 0;
+    }
+
+    .favorites-button {
+      padding: 5px 10px;
+      margin-top: 5px;
+    }
   </style>
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="navbar-container">
-      <ul class="navbar-menu">
-        <li><a href="{{ url_for('index') }}">Home</a></li>
-        <li><a href="{{ url_for('games_page') }}">Games</a></li>
-        <li><a href="{{ url_for('players_page') }}">Players</a></li>
-        <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
-        <li><a href="{{ url_for('stats') }}">Stats</a></li>
-        <li><a href="{{ url_for('login') }}">Login</a></li>
-      </ul>
-    </div>
-  </nav>
+<nav class="navbar">
+  <div class="navbar-container">
+    <ul class="navbar-menu">
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('games_page') }}">Games</a></li>
+      <li><a href="{{ url_for('players_page') }}">Players</a></li>
+      <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
+      <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
+      <li><a href="{{ url_for('stats') }}">Stats</a></li>
+      <li><a href="{{ url_for('standings_page') }}">Standings</a></li>
 
-  <h1>NBA Team Stats – {{ season }}</h1>
+      {% if session.get('user_id') %}
+        <li><a href="{{ url_for('account') }}">Account</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+
+<h1>NBA Team Stats – {{ season }}</h1>
 
 <div style="text-align: center; margin-bottom: 20px;">
   <form method="GET" action="{{ url_for('teams_page') }}">
@@ -57,79 +74,89 @@
   </form>
 </div>
 
-  
-
 <form id="teamCompareForm" method="GET" action="{{ url_for('compare_teams') }}">
-    <table>
-      <thead>
-        <tr>
-          <th>Select</th>
-          <th>Team</th>
-          <th>Wins</th>
-          <th>Losses</th>
-          <th>Points</th>
-          <th>Rebounds</th>
-          <th>Assists</th>
-          <th>Turnovers</th>
-          <th>Steals</th>
-          <th>Blocks</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for team in teams %}
-        <tr>
-          <td>
-            <input type="checkbox" name="team_ids" value="{{ team['TEAM_ID'] }}">
-          </td>
-          <td>
-            {% if team.LOGO %}
-              <img src="{{ team.LOGO }}" width="30" style="vertical-align: middle;"> 
-            {% endif %}
-            {{ team['TEAM_NAME'] }}
-          </td>
-          <td>{{ team['W'] }}</td>
-          <td>{{ team['L'] }}</td>
-          <td>{{ team['PTS'] }}</td>
-          <td>{{ team['REB'] }}</td>
-          <td>{{ team['AST'] }}</td>
-          <td>{{ team['TOV'] }}</td>
-          <td>{{ team['STL'] }}</td>
-          <td>{{ team['BLK'] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <table>
+    <thead>
+      <tr>
+        <th>Select</th>
+        <th>Team</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Points</th>
+        <th>Rebounds</th>
+        <th>Assists</th>
+        <th>Turnovers</th>
+        <th>Steals</th>
+        <th>Blocks</th>
+        <th>Favorite</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for team in teams %}
+      <tr>
+        <td>
+          <input type="checkbox" name="team_ids" value="{{ team['TEAM_ID'] }}">
+        </td>
+        <td>
+          {% if team.LOGO %}
+            <img src="{{ team.LOGO }}" width="30" style="vertical-align: middle;">
+          {% endif %}
+          {{ team['TEAM_NAME'] }}
+        </td>
+        <td>{{ team['W'] }}</td>
+        <td>{{ team['L'] }}</td>
+        <td>{{ team['PTS'] }}</td>
+        <td>{{ team['REB'] }}</td>
+        <td>{{ team['AST'] }}</td>
+        <td>{{ team['TOV'] }}</td>
+        <td>{{ team['STL'] }}</td>
+        <td>{{ team['BLK'] }}</td>
+        <td>
+          {% if session.get('user_id') %}
+          <form action="{{ url_for('save_team') }}" method="POST" class="favorites-form">
+            <input type="hidden" name="team_id" value="{{ team['TEAM_ID'] }}">
+            <input type="hidden" name="team_name" value="{{ team['TEAM_NAME'] }}">
+            <button type="submit" class="favorites-button">⭐</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-          const checkboxes = document.querySelectorAll('input[name="team_ids"]');
-          const form = document.getElementById('teamCompareForm');
-      
-          function updateCheckboxStates() {
-            const checked = document.querySelectorAll('input[name="team_ids"]:checked');
-            const disable = checked.length >= 2;
-      
-            checkboxes.forEach(cb => {
-              if (!cb.checked) cb.disabled = disable;
-            });
-          }
-      
-          checkboxes.forEach(cb => {
-            cb.addEventListener('change', updateCheckboxStates);
-          });
-      
-          form.addEventListener('submit', function (e) {
-            const checked = document.querySelectorAll('input[name="team_ids"]:checked');
-            if (checked.length !== 2) {
-              e.preventDefault();
-              alert("Please select exactly two teams for comparison.");
-            }
-          });
-        });
-      </script>
-      
-  
-    <div style="text-align: center; margin-top: 20px;">
-      <button type="submit">Compare Selected Teams</button>
-    </div>
-  </form>
+  <div style="text-align: center; margin-top: 20px;">
+    <button type="submit">Compare Selected Teams</button>
+  </div>
+</form>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('input[name="team_ids"]');
+    const form = document.getElementById('teamCompareForm');
+
+    function updateCheckboxStates() {
+      const checked = document.querySelectorAll('input[name="team_ids"]:checked');
+      const disable = checked.length >= 2;
+
+      checkboxes.forEach(cb => {
+        if (!cb.checked) cb.disabled = disable;
+      });
+    }
+
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', updateCheckboxStates);
+    });
+
+    form.addEventListener('submit', function (e) {
+      const checked = document.querySelectorAll('input[name="team_ids"]:checked');
+      if (checked.length !== 2) {
+        e.preventDefault();
+        alert("Please select exactly two teams for comparison.");
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

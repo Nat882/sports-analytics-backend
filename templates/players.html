@@ -1,13 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
   <title>NBA Players Stats - Season {{ season }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='players.css') }}">
-  <style>
-    
-  </style>
 </head>
 <body>
+
   <!-- Navigation Bar -->
   <nav class="navbar">
     <div class="navbar-container">
@@ -18,7 +16,14 @@
         <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
         <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
         <li><a href="{{ url_for('stats') }}">Stats</a></li>
-        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('standings_page') }}">Standings</a></li>
+
+        {% if session.get('user_id') %}
+          <li><a href="{{ url_for('account') }}">Account</a></li>
+          <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}">Login</a></li>
+        {% endif %}
       </ul>
     </div>
   </nav>
@@ -48,45 +53,55 @@
           <th>BLK</th>
           <th>TOV</th>
           <th>FG%</th>
+          <th>Favorite</th>
         </tr>
       </thead>
       <tbody>
         {% for player in players %}
-          <tr>
-            <!-- Include a checkbox with the player's unique ID (PLAYER_ID) -->
-            <td><input type="checkbox" name="player_ids" value="{{ player['PLAYER_ID'] }}"></td>
-            <td>{{ player['PLAYER_NAME'] }}</td>
-            <td>{{ player['TEAM_NAME'] }}</td>
-            <td>{{ player['PLAYER_POSITION'] }}</td>
-            <td>{{ player['GP'] }}</td>
-            <td>{{ player['PTS'] }}</td>
-            <td>{{ player['REB'] }}</td>
-            <td>{{ player['AST'] }}</td>
-            <td>{{ player['STL'] }}</td>
-            <td>{{ player['BLK'] }}</td>
-            <td>{{ player['TOV'] }}</td>
-            <td>{{ player['FG_PCT'] }}</td>
-          </tr>
+        <tr>
+          <td><input type="checkbox" name="player_ids" value="{{ player['PLAYER_ID'] }}"></td>
+          <td>{{ player['PLAYER_NAME'] }}</td>
+          <td>{{ player['TEAM_NAME'] }}</td>
+          <td>{{ player['PLAYER_POSITION'] }}</td>
+          <td>{{ player['GP'] }}</td>
+          <td>{{ player['PTS'] }}</td>
+          <td>{{ player['REB'] }}</td>
+          <td>{{ player['AST'] }}</td>
+          <td>{{ player['STL'] }}</td>
+          <td>{{ player['BLK'] }}</td>
+          <td>{{ player['TOV'] }}</td>
+          <td>{{ player['FG_PCT'] }}</td>
+          <td>
+            {% if session.get('user_id') %}
+            <form action="{{ url_for('save_player') }}" method="POST" style="margin: 0;">
+              <input type="hidden" name="player_id" value="{{ player['PLAYER_ID'] }}">
+              <input type="hidden" name="player_name" value="{{ player['PLAYER_NAME'] }}">
+              <button type="submit" style="padding: 5px;">⭐</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
-    <!-- The Compare button is disabled until exactly two checkboxes are selected -->
-    <button type="submit" id="compareButton" disabled>Compare Selected Players</button>
+
+    <div style="text-align: center; margin-top: 20px;">
+      <button type="submit" id="compareButton" disabled>Compare Selected Players</button>
+    </div>
   </form>
 
+  <!-- Compare Button Logic -->
   <script>
-    // JavaScript: Enable the Compare button only when exactly 2 players are selected
     const checkboxes = document.querySelectorAll('input[name="player_ids"]');
     const compareButton = document.getElementById('compareButton');
 
-    checkboxes.forEach(chk => {
-      chk.addEventListener('change', () => {
-        const selected = document.querySelectorAll('input[name="player_ids"]:checked');
-        compareButton.disabled = (selected.length !== 2);
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        const checked = document.querySelectorAll('input[name="player_ids"]:checked');
+        compareButton.disabled = (checked.length !== 2);
       });
     });
   </script>
 
-  <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 </html>

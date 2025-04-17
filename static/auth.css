@@ -1,0 +1,84 @@
+body { 
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.auth-container {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #18076e;
+}
+
+.auth-form input {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.auth-form input::placeholder {
+  color: #999;
+}
+
+.auth-form button {
+  padding: 12px;
+  background-color: #18076e;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-form button:hover {
+  background-color: #15065e;
+}
+
+.auth-form p {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.auth-form a {
+  color: #18076e;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.auth-form a:hover {
+  text-decoration: underline;
+}
+
+.flash-msg {
+  background-color: #18076e;
+  color: #fff;
+  padding: 10px;
+  margin-bottom: 15px;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}

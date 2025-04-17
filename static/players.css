@@ -1,64 +1,92 @@
-/* General Styles */
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    color: #333;
-  }
-  
-  /* Navigation Bar */
-  .navbar {
-    background-color: #18076e;
-    padding: 10px 20px;
-  }
-  
-  .navbar-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .navbar-menu {
-    list-style: none;
-    display: flex;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .navbar-menu li {
-    margin-right: 20px;
-  }
-  
-  .navbar-menu li a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-  }
-  
-  .navbar-menu li a:hover {
-    color: #ddd;
-  }
-  
-  /* Additional styling for table is already included inline in players.html,
-     but you can move it here if you prefer */
-  table {
-    width: 90%;
-    margin: 20px auto;
-    border-collapse: collapse;
-    background-color: #fff;
-  }
-  
-  th, td {
-    border: 1px solid #ccc;
-    padding: 10px;
-    text-align: center;
-  }
-  
-  th {
-    background-color: #18076e;
-    color: #fff;
-  }
-  
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  color: #222;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #18076e;
+  padding: 12px 20px;
+}
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar-menu {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+.navbar-menu li {
+  margin-right: 20px;
+}
+.navbar-menu li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+}
+.navbar-menu li a:hover {
+  color: #ffcc00;
+}
+
+/* Table Styling */
+table {
+  width: 95%;
+  margin: 30px auto;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+th, td {
+  padding: 12px 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+th {
+  background-color: #18076e;
+  color: white;
+  font-weight: bold;
+}
+
+/* Player Comparison Cards */
+.comparison-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  margin: 30px auto;
+  width: 90%;
+}
+.player-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 45%;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+.player-card h2 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #18076e;
+}
+.player-card p {
+  font-size: 1rem;
+  margin: 8px 0;
+}
+.label {
+  font-weight: 700;
+}
+
+/* Chart */
+#playerComparisonChart {
+  max-width: 800px;
+  margin: 40px auto;
+}

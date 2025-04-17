@@ -1,0 +1,28 @@
+<nav class="navbar">
+    <div class="navbar-container">
+      <ul class="navbar-menu">
+        <li><a href="{{ url_for('index') }}">Home</a></li>
+        <li><a href="{{ url_for('games_page') }}">Games</a></li>
+        <li><a href="{{ url_for('players_page') }}">Players</a></li>
+        <li><a href="{{ url_for('projections_page') }}">Projections</a></li>
+        <li><a href="{{ url_for('teams_page') }}">Teams</a></li>
+        <li><a href="{{ url_for('stats') }}">Stats</a></li>
+        {% if session.get('user_id') %}
+          <li><a href="{{ url_for('account') }}">Account</a></li>
+          <li><a href="#" onclick="confirmLogout()">Logout</a></li>
+
+        {% else %}
+          <li><a href="{{ url_for('login') }}">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  
+  <script>
+    function confirmLogout() {
+      if (confirm("Are you sure you want to log out?")) {
+        window.location.href = "{{ url_for('logout') }}";
+      }
+    }
+  </script>
+  

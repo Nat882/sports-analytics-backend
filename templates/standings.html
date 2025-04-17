@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NBA Standings</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <h1 style="text-align: center;">NBA Standings</h1>
+
+    <div class="standings-container">
+        <h2>Eastern Conference</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Win%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for team in standings['east'] %}
+                <tr>
+                    <td>{{ team['name'] }}</td>
+                    <td>{{ team['wins'] }}</td>
+                    <td>{{ team['losses'] }}</td>
+                    <td>{{ team['win_pct'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2>Western Conference</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Wins</th>
+                    <th>Losses</th>
+                    <th>Win%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for team in standings['west'] %}
+                <tr>
+                    <td>{{ team['name'] }}</td>
+                    <td>{{ team['wins'] }}</td>
+                    <td>{{ team['losses'] }}</td>
+                    <td>{{ team['win_pct'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
