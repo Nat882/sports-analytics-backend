@@ -1,0 +1,93 @@
+<!-- app/templates/teams.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team Statistics - Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    table { width:90%; margin:20px auto; border-collapse:collapse; background:#fff; }
+    th,td{ padding:12px 15px; text-align:center; border:1px solid #ccc; }
+    th{ background:#f4f4f4; font-weight:bold; }
+    h1{ text-align:center; margin:30px 0; }
+  </style>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <h1>NBA Team Stats – {{ season }}</h1>
+  <div style="text-align:center; margin-bottom:20px;">
+    <form method="GET" action="{{ url_for('teams.list_teams') }}">
+      <label for="season">Select Season:</label>
+      <select name="season" id="season" onchange="this.form.submit()">
+        {% for s in all_seasons %}
+          <option value="{{ s }}" {% if s==season %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+
+  <form id="teamCompareForm" method="GET" action="{{ url_for('teams.compare_teams') }}">
+    <table>
+      <thead>
+        <tr>
+          <th>Select</th><th>Team</th><th>Wins</th><th>Losses</th>
+          <th>Points</th><th>Rebounds</th><th>Assists</th>
+          <th>Turnovers</th><th>Steals</th><th>Blocks</th><th>Favorite</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for team in teams %}
+        <tr>
+          <td><input type="checkbox" name="team_ids" value="{{ team['TEAM_ID'] }}"></td>
+          <td>
+            {% if team.LOGO %}
+              <img src="{{ team.LOGO }}" width="30" style="vertical-align:middle;">
+            {% endif %}
+            {{ team['TEAM_NAME'] }}
+          </td>
+          <td>{{ team['W'] }}</td>
+          <td>{{ team['L'] }}</td>
+          <td>{{ team['PTS'] }}</td>
+          <td>{{ team['REB'] }}</td>
+          <td>{{ team['AST'] }}</td>
+          <td>{{ team['TOV'] }}</td>
+          <td>{{ team['STL'] }}</td>
+          <td>{{ team['BLK'] }}</td>
+          <td>
+            {% if current_user.is_authenticated %}
+            <form action="{{ url_for('teams.save_team') }}" method="POST" style="margin:0;">
+              <input type="hidden" name="team_id"   value="{{ team['TEAM_ID'] }}">
+              <input type="hidden" name="team_name" value="{{ team['TEAM_NAME'] }}">
+              <button type="submit">⭐</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div style="text-align:center; margin-top:20px;">
+      <button type="submit">Compare Selected Teams</button>
+    </div>
+  </form>
+
+  <script>
+    document.addEventListener('DOMContentLoaded',function(){
+      const cbs = document.querySelectorAll('input[name="team_ids"]');
+      const form = document.getElementById('teamCompareForm');
+      function update(){ 
+        const checked = document.querySelectorAll('input[name="team_ids"]:checked');
+        cbs.forEach(cb=>{ if(!cb.checked) cb.disabled = checked.length>=2; });
+      }
+      cbs.forEach(cb=>cb.addEventListener('change',update));
+      form.addEventListener('submit',function(e){
+        if(document.querySelectorAll('input[name="team_ids"]:checked').length!==2){
+          e.preventDefault(); alert("Please select exactly two teams.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

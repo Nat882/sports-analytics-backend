@@ -1,0 +1,29 @@
+<!-- app/templates/navbar.html -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <ul class="navbar-menu">
+      <li><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li><a href="{{ url_for('main.games_page') }}">Games</a></li>
+      <li><a href="{{ url_for('players.list_players') }}">Players</a></li>
+      <li><a href="{{ url_for('projections.projections_page') }}">Projections</a></li>
+      <li><a href="{{ url_for('teams.list_teams') }}">Teams</a></li>
+      <li><a href="{{ url_for('main.stats_page') }}">Stats</a></li>
+      <li><a href="{{ url_for('main.standings_page') }}">Standings</a></li>
+
+      {% if current_user.is_authenticated %}
+        <li><a href="{{ url_for('auth.account') }}">Account</a></li>
+        <li><a href="#" onclick="confirmLogout()">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+
+<script>
+  function confirmLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      window.location.href = "{{ url_for('auth.logout') }}";
+    }
+  }
+</script>

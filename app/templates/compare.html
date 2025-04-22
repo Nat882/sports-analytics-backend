@@ -1,0 +1,47 @@
+<!-- app/templates/compare.html -->
+<!doctype html>
+<html>
+<head>
+  <title>Player Comparison - Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='compare.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <h1 style="text-align: center;">Player Comparison - Season {{ season }}</h1>
+
+  <div class="comparison-container">
+    {% for player in players %}
+      <div class="player-card">
+        <h2>{{ player['PLAYER_NAME'] }}</h2>
+        <p><span class="label">Team:</span> {{ player['TEAM_NAME'] }}</p>
+        <p><span class="label">Position:</span> {{ player['PLAYER_POSITION'] }}</p>
+        <p><span class="label">GP:</span> {{ player['GP'] }}</p>
+        <p><span class="label">PTS:</span> {{ player['PTS'] }}</p>
+        <p><span class="label">REB:</span> {{ player['REB'] }}</p>
+        <p><span class="label">AST:</span> {{ player['AST'] }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="chart-container">
+    <label for="chartType">Select Chart Type:</label>
+    <select id="chartType">
+      <option value="bar">Bar Chart</option>
+      <option value="radar">Radar Chart</option>
+      <option value="line">Line Chart</option>
+    </select>
+  </div>
+
+  <canvas id="playerComparisonChart"></canvas>
+  <canvas id="radarChart"></canvas>
+  <canvas id="lineChart"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    var playersData = {{ players|tojson|safe }};
+  </script>
+  <script src="{{ url_for('static', filename='compare_chart.js') }}"></script>
+</body>
+</html>

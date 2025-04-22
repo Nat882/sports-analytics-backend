@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <title>Today's NBA Games and Box Scores</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-container">
+      <ul class="navbar-menu">
+        <li><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li><a href="{{ url_for('main.games_page') }}">Games</a></li>
+        <li><a href="{{ url_for('players.list_players') }}">Players</a></li>
+        <li><a href="{{ url_for('projections.projections_page') }}">Projections</a></li>
+        <li><a href="{{ url_for('teams.list_teams') }}">Teams</a></li>
+        <li><a href="{{ url_for('main.stats_page') }}">Stats</a></li>
+        <li><a href="{{ url_for('main.standings_page') }}">Standings</a></li>
+        {% if current_user.is_authenticated %}
+          <li><a href="{{ url_for('auth.account') }}">Account</a></li>
+          <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+        {% else %}
+          <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
+  
+  <h1>Today's NBA Games</h1>
+  <ul id="games-list">
+    {% if games %}
+      {% for game in games %}
+      <li class="game-card">
+        <div class="game-row">
+          <!-- Away team -->
+          <div class="team away-team">
+            <img src="{{ game.AWAY_TEAM_LOGO }}" 
+                 alt="{{ game.AWAY_TEAM_NAME }} Logo" 
+                 class="team-logo">
+            <span class="team-name">{{ game.AWAY_TEAM_NAME }}</span>
+          </div>
+      
+          <!-- Scoreboard container -->
+          <div class="scoreboard-container">
+            <div class="score-label">Box Score</div>
+            <div class="scoreboard">
+              <span class="away-score">
+                {{ game.AWAY_TEAM_SCORE|default(0)|int }} 
+              </span>
+              <span class="score-separator">-</span>
+              <span class="home-score">
+                {{ game.HOME_TEAM_SCORE|default(0)|int }} 
+              </span>
+            </div>
+          </div>
+      
+          <!-- Home team -->
+          <div class="team home-team">
+            <img src="{{ game.HOME_TEAM_LOGO }}" 
+                 alt="{{ game.HOME_TEAM_NAME }} Logo" 
+                 class="team-logo">
+            <span class="team-name">{{ game.HOME_TEAM_NAME }}</span>
+          </div>
+        </div>
+        
+        <!-- Game status/time below the game row -->
+        <div class="game-info">
+          <span class="status">{{ game.GAME_STATUS_TEXT }}</span>
+          {% if game.GAME_TIME_EST %}
+            <span class="time">{{ game.GAME_TIME_EST }}</span>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    {% else %}
+      <p>No games found for today.</p>
+    {% endif %}
+  </ul>
+  
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>

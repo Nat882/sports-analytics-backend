@@ -1,0 +1,70 @@
+<!-- app/templates/players.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NBA Players Stats - Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='players.css') }}">
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <h1 style="text-align: center;">NBA Players Stats - Season {{ season }}</h1>
+
+  <form method="GET" action="{{ url_for('players.list_players') }}" style="text-align: center; margin-bottom: 20px;">
+    <input type="text" name="q" placeholder="Search for a player" value="{{ query }}" style="padding: 10px; width: 300px;">
+    <button type="submit" style="padding: 10px;">Search</button>
+  </form>
+
+  <form id="compareForm" method="GET" action="{{ url_for('players.compare_players') }}">
+    <table>
+      <thead>
+        <tr>
+          <th>Select</th><th>Player Name</th><th>Team</th><th>Position</th>
+          <th>GP</th><th>PTS</th><th>REB</th><th>AST</th>
+          <th>STL</th><th>BLK</th><th>TOV</th><th>FG%</th><th>Favorite</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for player in players %}
+        <tr>
+          <td><input type="checkbox" name="player_ids" value="{{ player['PLAYER_ID'] }}"></td>
+          <td>{{ player['PLAYER_NAME'] }}</td>
+          <td>{{ player['TEAM_NAME'] }}</td>
+          <td>{{ player['PLAYER_POSITION'] }}</td>
+          <td>{{ player['GP'] }}</td>
+          <td>{{ player['PTS'] }}</td>
+          <td>{{ player['REB'] }}</td>
+          <td>{{ player['AST'] }}</td>
+          <td>{{ player['STL'] }}</td>
+          <td>{{ player['BLK'] }}</td>
+          <td>{{ player['TOV'] }}</td>
+          <td>{{ player['FG_PCT'] }}</td>
+          <td>
+            {% if current_user.is_authenticated %}
+            <form action="{{ url_for('players.save_player') }}" method="POST" style="margin:0;">
+              <input type="hidden" name="player_id"   value="{{ player['PLAYER_ID'] }}">
+              <input type="hidden" name="player_name" value="{{ player['PLAYER_NAME'] }}">
+              <button type="submit" style="padding:5px;">⭐</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div style="text-align: center; margin-top:20px;">
+      <button type="submit" id="compareButton" disabled>Compare Selected Players</button>
+    </div>
+  </form>
+
+  <script>
+    const checkboxes   = document.querySelectorAll('input[name="player_ids"]');
+    const compareButton= document.getElementById('compareButton');
+    checkboxes.forEach(cb=>cb.addEventListener('change',()=>{
+      const checked = document.querySelectorAll('input[name="player_ids"]:checked');
+      compareButton.disabled = (checked.length!==2);
+    }));
+  </script>
+</body>
+</html>
