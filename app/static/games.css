@@ -1,0 +1,89 @@
+/* app/static/games.css */
+
+/* Container for the list of games */
+.games-list {
+    list-style: none;
+    margin: 1.5em 0;
+    padding: 0;
+  }
+  
+  /* Individual game card styling */
+  .game-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1em;
+    margin-bottom: 1em;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Row holding teams and score */
+  .game-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* Team container: logo + name */
+  .team {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Team logo image */
+  .team-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    margin-right: 0.75em;
+    border-radius: 50%;
+    background-color: #f9f9f9;
+    padding: 0.25em;
+  }
+  
+  /* Scoreboard center container */
+  .scoreboard-container {
+    text-align: center;
+    flex: 0 0 auto;
+  }
+  
+  /* Styling for the score numbers */
+  .scoreboard {
+    font-size: 1.25em;
+    font-weight: bold;
+  }
+  
+  /* Game status and time info below */
+  .game-info {
+    margin-top: 0.75em;
+    font-size: 0.9em;
+    color: #555;
+    text-align: center;
+  }
+  
+  /* Date picker form styling */
+  form[action*="/games"] {
+    margin: 1em 0;
+    text-align: center;
+  }
+  
+  form[action*="/games"] input[type="date"],
+  form[action*="/games"] button {
+    padding: 0.5em 1em;
+    margin: 0 0.25em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  form[action*="/games"] button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  form[action*="/games"] button:hover {
+    background-color: #0056b3;
+  }
+  

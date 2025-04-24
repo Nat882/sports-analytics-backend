@@ -1,11 +1,68 @@
-<!-- templates/games.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-    <title>Games Page</title>
+  <title>Past NBA Games</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='games.css') }}">
 </head>
 <body>
-    <h1>NBA Games</h1>
-    <!-- You can add content or data here -->
+  {% include "navbar.html" %}
+
+  <h1>NBA Games on {{ display_date }}</h1>
+
+  <form method="GET" action="{{ url_for('games.games_page') }}">
+    <label for="date">Choose date:</label>
+    <input type="date" id="date" name="date" value="{{ selected_date }}">
+    <button type="submit">Go</button>
+  </form>
+
+  {% if games %}
+  <ul class="games-list">
+    {% for game in games %}
+    <li class="game-card">
+      <div class="game-row">
+        <!-- Away team -->
+        <div class="team away-team">
+          {% if game.AWAY_TEAM_LOGO %}
+          <img src="{{ game.AWAY_TEAM_LOGO }}"
+               alt="{{ game.AWAY_TEAM_NAME }} logo"
+               class="team-logo">
+          {% endif %}
+          <span class="team-name">{{ game.AWAY_TEAM_NAME }}</span>
+        </div>
+
+        <!-- Scoreboard -->
+        <div class="scoreboard-container">
+          <div class="score-label">Score</div>
+          <div class="scoreboard">
+            <span class="away-score">{{ game.AWAY_TEAM_SCORE|int }}</span>
+            <span class="score-separator">–</span>
+            <span class="home-score">{{ game.HOME_TEAM_SCORE|int }}</span>
+          </div>
+        </div>
+
+        <!-- Home team -->
+        <div class="team home-team">
+          {% if game.HOME_TEAM_LOGO %}
+          <img src="{{ game.HOME_TEAM_LOGO }}"
+               alt="{{ game.HOME_TEAM_NAME }} logo"
+               class="team-logo">
+          {% endif %}
+          <span class="team-name">{{ game.HOME_TEAM_NAME }}</span>
+        </div>
+      </div>
+
+      <div class="game-info">
+        <span class="status">{{ game.GAME_STATUS_TEXT }}</span>
+        {% if game.GAME_TIME_EST %}
+        <span class="time">| {{ game.GAME_TIME_EST }}</span>
+        {% endif %}
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    <p>No games found for that date.</p>
+  {% endif %}
 </body>
 </html>

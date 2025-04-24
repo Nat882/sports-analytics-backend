@@ -9,6 +9,8 @@
     th,td{ padding:10px; border:1px solid #ddd; text-align:center; }
     th{ background:#f4f4f4; }
     h1{ text-align:center; margin-top:30px; }
+    a.proj-link { color: #007bff; text-decoration: none; font-weight: bold; }
+    a.proj-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -18,8 +20,12 @@
   <table>
     <thead>
       <tr>
-        <th>Player</th><th>Team</th><th>GP</th>
-        <th>Projected Points</th><th>Projected Rebounds</th><th>Projected Assists</th>
+        <th>Player</th>
+        <th>Team</th>
+        <th>GP</th>
+        <th>Projected Points</th>
+        <th>Projected Rebounds</th>
+        <th>Projected Assists</th>
       </tr>
     </thead>
     <tbody>
@@ -28,9 +34,24 @@
         <td>{{ player['PLAYER_NAME'] }}</td>
         <td>{{ player['TEAM_ABBREVIATION'] }}</td>
         <td>{{ player['GP'] }}</td>
-        <td>{{ player['PROJECTED_PTS'] }}</td>
-        <td>{{ player['PROJECTED_REB'] }}</td>
-        <td>{{ player['PROJECTED_AST'] }}</td>
+        <td>
+          <a href="{{ url_for('projections.stat_trend', player_id=player['PLAYER_ID'], stat='PTS') }}"
+             class="proj-link">
+            {{ player['PROJECTED_PTS'] }}
+          </a>
+        </td>
+        <td>
+          <a href="{{ url_for('projections.stat_trend', player_id=player['PLAYER_ID'], stat='REB') }}"
+             class="proj-link">
+            {{ player['PROJECTED_REB'] }}
+          </a>
+        </td>
+        <td>
+          <a href="{{ url_for('projections.stat_trend', player_id=player['PLAYER_ID'], stat='AST') }}"
+             class="proj-link">
+            {{ player['PROJECTED_AST'] }}
+          </a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>

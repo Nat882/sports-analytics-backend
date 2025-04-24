@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{ stat }} Trend – Season {{ season }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  {% include "navbar.html" %}
+
+  <h1 style="text-align:center;">
+    {{ stat }} Accumulation for Player {{ player_id }} – Season {{ season }}
+  </h1>
+
+  <canvas id="trendChart" style="max-width:800px; margin:2em auto;"></canvas>
+
+  <script>
+    const labels = {{ dates|tojson }};
+    const data   = {{ values|tojson }};
+    const projected = {{ projected }};
+
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Cumulative {{ stat }}',
+            data: data,
+          },
+          {
+            label: 'Projected Total',
+            data: Array(labels.length).fill(projected),
+            borderDash: [5,5],
+          }
+        ]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -101,10 +101,10 @@
 
       let labels = [], values = [];
       if (type === 'player') {
-        labels = ['GP','PTS','REB','AST','STL','BLK','TOV','FG%'];
+        labels = ['PTS','REB','AST','STL','BLK','TOV',];
         values = [
-          data.GP||0, data.PTS||0, data.REB||0, data.AST||0,
-          data.STL||0, data.BLK||0, data.TOV||0, data.FG_PCT||0
+          data.PTS||0, data.REB||0, data.AST||0,
+          data.STL||0, data.BLK||0, data.TOV||0,
         ];
       } else {
         labels = ['W','L','PTS','REB','AST','TOV','STL','BLK'];
