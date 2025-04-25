@@ -3,6 +3,8 @@
 import datetime
 from nba_api.stats.library.http import NBAStatsHTTP
 from nba_api.stats.static import teams
+from nba_api.stats.endpoints import LeagueDashTeamStats
+from requests.exceptions import ReadTimeout
 
 def nba_api_setup():
     """
@@ -33,10 +35,13 @@ def get_current_season():
         end = str(now.year)[-2:]
     return f"{start}-{end}"
 
-def get_all_teams():
-    """
-    Fetch the static list of all NBA teams once and return it as a dict:
-      { team_id: full_name, ... }
-    """
-    all_teams = teams.get_teams()
-    return {t['id']: t['full_name'] for t in all_teams}
+def get_all_teams(season=None):
+    try:
+        stats = LeagueDashTeamStats(
+            season=season,
+            timeout=15
+        )
+        df = stats.get_data_frames()[0]
+        return {row['TEAM_ID']: row['TEAM_NAME'] for _, row in df.iterrows()}
+    except ReadTimeout:
+        return {}
