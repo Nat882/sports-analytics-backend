@@ -1,7 +1,7 @@
-<!-- app/templates/players.html -->
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>NBA Players Stats - Season {{ season }}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='players.css') }}">
 </head>
@@ -19,9 +19,19 @@
     <table>
       <thead>
         <tr>
-          <th>Select</th><th>Player Name</th><th>Team</th><th>Position</th>
-          <th>GP</th><th>PTS</th><th>REB</th><th>AST</th>
-          <th>STL</th><th>BLK</th><th>TOV</th><th>FG%</th><th>Favorite</th>
+          <th>Select</th>
+          <th>Player Name</th>
+          <th>Team</th>
+          <th>Position</th>
+          <th>GP</th>
+          <th>PTS</th>
+          <th>REB</th>
+          <th>AST</th>
+          <th>STL</th>
+          <th>BLK</th>
+          <th>TOV</th>
+          <th>FG%</th>
+          <th>Favorite</th>
         </tr>
       </thead>
       <tbody>
@@ -41,7 +51,12 @@
           <td>{{ player['FG_PCT'] }}</td>
           <td>
             {% if current_user.is_authenticated %}
-            <form action="{{ url_for('players.save_player') }}" method="POST" style="margin:0;">
+            <form
+              action="{{ url_for('players.save_player') }}"
+              method="POST"
+              onsubmit="return addFavorite(event, '{{ player.PLAYER_NAME }}');"
+              style="margin:0;"
+            >
               <input type="hidden" name="player_id"   value="{{ player['PLAYER_ID'] }}">
               <input type="hidden" name="player_name" value="{{ player['PLAYER_NAME'] }}">
               <button type="submit" style="padding:5px;">⭐</button>
@@ -59,12 +74,39 @@
   </form>
 
   <script>
-    const checkboxes   = document.querySelectorAll('input[name="player_ids"]');
-    const compareButton= document.getElementById('compareButton');
-    checkboxes.forEach(cb=>cb.addEventListener('change',()=>{
+    // Enable compare button only when exactly 2 are checked
+    const checkboxes    = document.querySelectorAll('input[name="player_ids"]');
+    const compareButton = document.getElementById('compareButton');
+    checkboxes.forEach(cb => cb.addEventListener('change', () => {
       const checked = document.querySelectorAll('input[name="player_ids"]:checked');
-      compareButton.disabled = (checked.length!==2);
+      compareButton.disabled = (checked.length !== 2);
     }));
+  </script>
+
+  <!-- Favorite‐button AJAX + alert -->
+  <script>
+    async function addFavorite(e, name) {
+      e.preventDefault();
+      const form = e.target;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body:    new FormData(form),
+          credentials: 'include'
+        });
+        if (res.ok) {
+          alert(`"${name}" added to your favourites!`);
+          window.location.reload();
+        } else {
+          const text = await res.text();
+          alert(`Error: ${text}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error, please try again.');
+      }
+      return false;
+    }
   </script>
 </body>
 </html>

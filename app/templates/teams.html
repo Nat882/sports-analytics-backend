@@ -1,4 +1,3 @@
-<!-- app/templates/teams.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,9 +30,17 @@
     <table>
       <thead>
         <tr>
-          <th>Select</th><th>Team</th><th>Wins</th><th>Losses</th>
-          <th>Points</th><th>Rebounds</th><th>Assists</th>
-          <th>Turnovers</th><th>Steals</th><th>Blocks</th><th>Favorite</th>
+          <th>Select</th>
+          <th>Team</th>
+          <th>Wins</th>
+          <th>Losses</th>
+          <th>Points</th>
+          <th>Rebounds</th>
+          <th>Assists</th>
+          <th>Turnovers</th>
+          <th>Steals</th>
+          <th>Blocks</th>
+          <th>Favorite</th>
         </tr>
       </thead>
       <tbody>
@@ -56,7 +63,12 @@
           <td>{{ team['BLK'] }}</td>
           <td>
             {% if current_user.is_authenticated %}
-            <form action="{{ url_for('teams.save_team') }}" method="POST" style="margin:0;">
+            <form
+              action="{{ url_for('teams.save_team') }}"
+              method="POST"
+              onsubmit="return addFavorite(event, '{{ team.TEAM_NAME }}');"
+              style="margin:0;"
+            >
               <input type="hidden" name="team_id"   value="{{ team['TEAM_ID'] }}">
               <input type="hidden" name="team_name" value="{{ team['TEAM_NAME'] }}">
               <button type="submit">⭐</button>
@@ -74,20 +86,48 @@
   </form>
 
   <script>
-    document.addEventListener('DOMContentLoaded',function(){
+    // Enforce exactly 2 checkboxes for comparison
+    document.addEventListener('DOMContentLoaded', () => {
       const cbs = document.querySelectorAll('input[name="team_ids"]');
       const form = document.getElementById('teamCompareForm');
-      function update(){ 
+      function update() {
         const checked = document.querySelectorAll('input[name="team_ids"]:checked');
-        cbs.forEach(cb=>{ if(!cb.checked) cb.disabled = checked.length>=2; });
+        cbs.forEach(cb => cb.disabled = !cb.checked && checked.length >= 2);
       }
-      cbs.forEach(cb=>cb.addEventListener('change',update));
-      form.addEventListener('submit',function(e){
-        if(document.querySelectorAll('input[name="team_ids"]:checked').length!==2){
-          e.preventDefault(); alert("Please select exactly two teams.");
+      cbs.forEach(cb => cb.addEventListener('change', update));
+      form.addEventListener('submit', e => {
+        if (document.querySelectorAll('input[name="team_ids"]:checked').length !== 2) {
+          e.preventDefault();
+          alert("Please select exactly two teams.");
         }
       });
     });
+  </script>
+
+  <!-- Favorite‐button AJAX + alert -->
+  <script>
+    async function addFavorite(e, name) {
+      e.preventDefault();
+      const form = e.target;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body:    new FormData(form),
+          credentials: 'include'
+        });
+        if (res.ok) {
+          alert(`"${name}" added to your favourites!`);
+          window.location.reload();
+        } else {
+          const text = await res.text();
+          alert(`Error: ${text}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error, please try again.');
+      }
+      return false;
+    }
   </script>
 </body>
 </html>

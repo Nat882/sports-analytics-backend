@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from requests.exceptions import ReadTimeout
 from nba_api.stats.endpoints import LeagueDashPlayerStats, CommonPlayerInfo
+from flask_login import current_user, login_required
+
 from ..services.nba_client import get_current_season, teams as all_teams
 from ..models import FavoritePlayer
 from ..extensions import db
@@ -13,11 +15,21 @@ def list_players():
     query = request.args.get('q', '').strip()
     season = get_current_season()
     try:
-        stats = LeagueDashPlayerStats(season=season, per_mode_detailed='PerGame', timeout=15)
+        stats = LeagueDashPlayerStats(
+            season=season,
+            per_mode_detailed='PerGame',
+            timeout=15
+        )
         df = stats.get_data_frames()[0]
         players = df.to_dict(orient='records')
     except ReadTimeout:
-        return render_template('players.html', players=[], query=query, season=season, error="Could not load player stats.")
+        return render_template(
+            'players.html',
+            players=[],
+            query=query,
+            season=season,
+            error="Could not load player stats."
+        )
 
     # fetch positions
     positions = {}
@@ -32,22 +44,35 @@ def list_players():
     team_dict = {t['id']: t['full_name'] for t in all_teams.get_teams()}
     for p in players:
         p['TEAM_NAME'] = team_dict.get(p['TEAM_ID'], 'Unknown')
-        p['POSITION'] = positions.get(p['PLAYER_ID'], 'N/A')
-        p['LOGO'] = team_logos.get(p['TEAM_ID'])
+        p['POSITION']  = positions.get(p['PLAYER_ID'], 'N/A')
+        p['LOGO']      = team_logos.get(p['TEAM_ID'])
 
     if query:
-        players = [p for p in players if query.lower() in p['PLAYER_NAME'].lower()]
+        players = [
+            p for p in players
+            if query.lower() in p['PLAYER_NAME'].lower()
+        ]
 
-    return render_template('players.html', players=players, query=query, season=season)
+    return render_template(
+        'players.html',
+        players=players,
+        query=query,
+        season=season
+    )
 
 @bp.route('/compare')
 def compare_players():
     ids = request.args.getlist('player_ids')
     if len(ids) != 2:
         return "Select exactly two players.", 400
+
     season = get_current_season()
     try:
-        stats = LeagueDashPlayerStats(season=season, per_mode_detailed='PerGame', timeout=15)
+        stats = LeagueDashPlayerStats(
+            season=season,
+            per_mode_detailed='PerGame',
+            timeout=15
+        )
         df = stats.get_data_frames()[0]
         all_players = df.to_dict(orient='records')
     except ReadTimeout:
@@ -60,17 +85,31 @@ def compare_players():
 
     if len(selected) != 2:
         return "Players not found.", 404
-    return render_template('compare.html', players=selected, season=season)
+
+    return render_template(
+        'compare.html',
+        players=selected,
+        season=season
+    )
 
 @bp.route('/save', methods=['POST'])
+@login_required
 def save_player():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    pid = request.form['player_id']
+    pid  = request.form['player_id']
     name = request.form['player_name']
-    fav = FavoritePlayer.query.filter_by(player_id=pid, user_id=session['user_id']).first()
+
+    fav = FavoritePlayer.query.filter_by(
+        player_id=pid,
+        user_id=current_user.id
+    ).first()
+
     if not fav:
-        db.session.add(FavoritePlayer(player_id=pid, player_name=name, user_id=session['user_id']))
+        db.session.add(FavoritePlayer(
+            player_id=pid,
+            player_name=name,
+            user_id=current_user.id
+        ))
         db.session.commit()
         flash(f"{name} added to favorites!")
+
     return redirect(url_for('players.list_players'))

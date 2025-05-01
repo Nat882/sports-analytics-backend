@@ -13,12 +13,14 @@
       margin:10px 5%; align-items:center;
     }
     .proj-controls label { margin-right:0.25em; }
+    .flash-container { max-width:600px; margin:1em auto; }
+    .flash { background:#fee; border:1px solid #faa; padding:0.5em; margin-bottom:0.5em; }
   </style>
 </head>
 <body>
   {% include "navbar.html" %}
 
-  {# ——— Display flashed messages ——— #}
+  {# — Flash messages — #}
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       <div class="flash-container">
@@ -31,7 +33,7 @@
   
   <h1>Projected Player Totals – Season {{ season }}</h1>
 
-  <!-- 1) Heuristic table with clickable links -->
+  <!-- Heuristic table -->
   <table>
     <thead>
       <tr>
@@ -45,27 +47,15 @@
         <td>{{ p.PLAYER_NAME }}</td>
         <td>{{ p.TEAM_ABBREVIATION }}</td>
         <td>{{ p.GP }}</td>
-        <td>
-          <a href="{{ url_for('projections.stat_trend',
-                       player_id=p.PLAYER_ID, stat='PTS') }}"
-             class="proj-link">{{ p.PROJECTED_PTS }}</a>
-        </td>
-        <td>
-          <a href="{{ url_for('projections.stat_trend',
-                       player_id=p.PLAYER_ID, stat='REB') }}"
-             class="proj-link">{{ p.PROJECTED_REB }}</a>
-        </td>
-        <td>
-          <a href="{{ url_for('projections.stat_trend',
-                       player_id=p.PLAYER_ID, stat='AST') }}"
-             class="proj-link">{{ p.PROJECTED_AST }}</a>
-        </td>
+        <td><a href="{{ url_for('projections.stat_trend', player_id=p.PLAYER_ID, stat='PTS') }}" class="proj-link">{{ p.PROJECTED_PTS }}</a></td>
+        <td><a href="{{ url_for('projections.stat_trend', player_id=p.PLAYER_ID, stat='REB') }}" class="proj-link">{{ p.PROJECTED_REB }}</a></td>
+        <td><a href="{{ url_for('projections.stat_trend', player_id=p.PLAYER_ID, stat='AST') }}" class="proj-link">{{ p.PROJECTED_AST }}</a></td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <!-- 2) Controls -->
+  <!-- Controls -->
   <div class="proj-controls">
     <label for="projTypeSelector">Show:</label>
     <select id="projTypeSelector">
@@ -74,23 +64,25 @@
       <option value="ml">ML Only</option>
     </select>
 
+    <label for="seasonSelector">Season:</label>
+    <select id="seasonSelector">
+      {% for s in ['2024-25','2023-24','2022-23','2021-22'] %}
+        <option value="{{ s }}" {% if s == season %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+
     <label for="teamSelector">Team:</label>
     <select id="teamSelector"></select>
 
     <label for="statSelector">Stat:</label>
-    <select id="statSelector">
-      <option value="PTS" selected>Points</option>
-      <option value="REB">Rebounds</option>
-      <option value="AST">Assists</option>
-    </select>
+    <select id="statSelector"></select>
   </div>
 
   <h2 style="text-align:center;">Season‐End Projections</h2>
-  <canvas id="mlProjChart" width="800" height="400"
-          style="display:block; margin:0 auto;"></canvas>
+  <canvas id="mlProjChart" width="800" height="400" style="display:block; margin:0 auto;"></canvas>
 
-  <!-- expose data to JS -->
   <script>
+    // expose data to JS
     window.PROJ_DATA = {
       players:      {{ players|tojson }},
       allTeams:     {{ all_teams|tojson }},
@@ -98,9 +90,17 @@
       mode:         "{{ mode }}"
     };
   </script>
-
-  <!-- load Chart.js then your script -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="{{ url_for('static', filename='projections.js') }}"></script>
+
+  <script>
+    // reload when user picks a different season
+    document.getElementById('seasonSelector').addEventListener('change', e => {
+      const s = e.target.value;
+      const q = new URLSearchParams(window.location.search);
+      q.set('season', s);
+      window.location.search = q.toString();
+    });
+  </script>
 </body>
 </html>

@@ -1,5 +1,3 @@
-# app/services/ml_models.py
-
 import os
 import pickle
 import numpy as np
@@ -11,16 +9,25 @@ def predict_season_total(player_id: int, season: str) -> float:
     """
     Load the per-player linear regression model and predict cumulative points at game 82.
     """
-    model_path = os.path.join(MODEL_DIR, f'proj_model_{player_id}_{season}.pkl')
-    if not os.path.exists(model_path):
-        # let your blueprint catch this and return 404
+    # allow both "2024-25" and "202425" filename conventions
+    candidates = [
+        season,
+        season.replace('-', ''),
+    ]
+    model_path = None
+    for s in candidates:
+        p = os.path.join(MODEL_DIR, f'proj_model_{player_id}_{s}.pkl')
+        if os.path.exists(p):
+            model_path = p
+            break
+
+    if model_path is None:
         raise FileNotFoundError(f"No model for {player_id} / {season}")
 
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
 
-    # we trained on X = [[1], [2], [3], ...] representing game number
-    # to project end-of-season total, ask for game number = 82
+    # we trained on X = [[1], [2], ...]; project for game #82
     X_full = np.array([[82]])
     total = model.predict(X_full)[0]
     return float(total)

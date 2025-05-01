@@ -1,52 +1,56 @@
-# app/routes/projections.py
+from flask import Blueprint, render_template, flash, jsonify, request 
+from requests.exceptions import ReadTimeout  
+from nba_api.stats.endpoints import leaguedashplayerstats 
+from nba_api.stats.endpoints.playergamelog import PlayerGameLog  
 
-from flask import Blueprint, render_template, flash, jsonify, request
-from requests.exceptions import ReadTimeout
-from nba_api.stats.endpoints import leaguedashplayerstats
-from nba_api.stats.endpoints.playergamelog import PlayerGameLog
+from ..services.nba_client import get_current_season, teams as nba_teams_client  
+import app.services.ml_models as ml_models  
 
-from ..services.nba_client import get_current_season, teams as nba_teams_client
-import app.services.ml_models as ml_models  # note the module import
-
+# Blueprint for all projection-related routes under /projections
 bp = Blueprint('projections', __name__, url_prefix='/projections')
+
 
 @bp.route('/', methods=['GET'])
 def projections_page():
-    season = get_current_season()
+    # Determine season (query param or default)
+    season = request.args.get('season') or get_current_season()
+    # Optional team filter and display mode 'heuristic', 'ml', or 'both'
     team_id = request.args.get('team', type=int)
-    mode    = request.args.get('mode', 'heuristic')  # 'heuristic' or 'ml'
+    mode    = request.args.get('mode', 'both')
 
-    # 1) Fetch per-game stats
+    # Fetch per-game player stats for the season
     try:
         stats = leaguedashplayerstats.LeagueDashPlayerStats(
             season=season,
             per_mode_detailed='PerGame',
             timeout=15
         )
-        df = stats.get_data_frames()[0]
-        players = df.to_dict(orient='records')
+        df = stats.get_data_frames()[0]  
+        players = df.to_dict(orient='records')  
     except ReadTimeout:
         flash('Could not load player projections.')
         players = []
 
-    # 2) Optional team filter
+    # If a team is selected, filter players by TEAM_ID
     if team_id:
         players = [p for p in players if p.get('TEAM_ID') == team_id]
 
-    # 3) Compute heuristic projections
+    # Compute simple heuristic projections over an 82-game season
     for p in players:
-        gp = p.get('GP') or 0
-        rem = max(0, 82 - gp)
-        p['PROJECTED_PTS'] = round(p.get('PTS', 0) * rem, 1)
-        p['PROJECTED_REB'] = round(p.get('REB', 0) * rem, 1)
-        p['PROJECTED_AST'] = round(p.get('AST', 0) * rem, 1)
+        avg_pts = p.get('PTS', 0)
+        avg_reb = p.get('REB', 0)
+        avg_ast = p.get('AST', 0)
+        p['PROJECTED_PTS'] = round(avg_pts * 82, 1)
+        p['PROJECTED_REB'] = round(avg_reb * 82, 1)
+        p['PROJECTED_AST'] = round(avg_ast * 82, 1)
 
-    # 4) Load list of all teams for your dropdown
+    # Load all NBA teams for the season selector
     try:
         all_teams = nba_teams_client.get_teams()
     except Exception:
         all_teams = []
 
+    # Render the projections page with data and UI controls
     return render_template(
         'projections.html',
         players=players,
@@ -60,11 +64,11 @@ def projections_page():
 @bp.route('/trend/<int:player_id>/<stat>')
 def stat_trend(player_id, stat):
     """
-    Display a player's cumulative stat trend vs projection.
+    Display a player's cumulative stat trend vs. projected total.
     """
     season = get_current_season()
 
-    # 1) Fetch per-game logs
+    # Fetch the player's game log for the season
     try:
         logs = PlayerGameLog(
             player_id=player_id,
@@ -72,7 +76,7 @@ def stat_trend(player_id, stat):
             season_type_all_star='Regular Season',
             timeout=15
         )
-        df = logs.get_data_frames()[0]
+        df = logs.get_data_frames()[0]  
     except ReadTimeout:
         flash('Could not load game log for this player.')
         return render_template(
@@ -81,20 +85,15 @@ def stat_trend(player_id, stat):
             stat=stat, player_id=player_id, season=season
         )
 
-    # 2) Build cumulative series
+    # Build cumulative series of the chosen stat
     dates = df['GAME_DATE'].tolist()
-    vals  = df[stat].tolist()
-    cum   = []
-    total = 0
-    for v in vals:
-        total += v
-        cum.append(total)
+    cum   = df[stat].cumsum().tolist()
 
-    # 3) Heuristic projection
-    gp = len(vals)
-    avg = df[stat].mean() if gp else 0
-    projected = round(avg * (gp + max(0, 82 - gp)), 1)
+    # Compute heuristic projection: mean per game * 82
+    avg = df[stat].mean() if not df.empty else 0
+    projected = round(avg * 82, 1)
 
+    # Render the trend chart template
     return render_template(
         'projections_trend.html',
         dates=dates,
@@ -109,11 +108,11 @@ def stat_trend(player_id, stat):
 @bp.route('/api/player_projections_ml/<int:player_id>')
 def ml_proj(player_id):
     """
-    Returns ML‐based season projection for a given player.
+    API endpoint returning ML-based season projection for a player.
     """
     season = get_current_season()
     try:
-        # call through the ml_models module:
+        # Use ML model to predict total points for the season
         proj_total = ml_models.predict_season_total(player_id, season)
         return jsonify({
             'PLAYER_ID':        player_id,
