@@ -27,7 +27,7 @@ def predict_season_total(player_id: int, season: str) -> float:
     with open(model_path, 'rb') as f:
         model = pickle.load(f)
 
-    # we trained on X = [[1], [2], ...]; project for game #82
+    # trained on X = [[1], [2], ...]; project for game #82
     X_full = np.array([[82]])
     total = model.predict(X_full)[0]
     return float(total)

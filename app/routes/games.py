@@ -1,16 +1,17 @@
-from flask import Blueprint, render_template, request, flash
-from requests.exceptions import ReadTimeout
-from datetime import datetime, timedelta
-from ..services.nba_client import get_all_teams
-from ..team_logos import team_logos
-from nba_api.stats.library.http import NBAStatsHTTP
-import requests
+from flask import Blueprint, render_template, request, flash  
+from requests.exceptions import ReadTimeout                    
+from datetime import datetime, timedelta                      
+from ..services.nba_client import get_all_teams               
+from ..team_logos import team_logos                           
+from nba_api.stats.library.http import NBAStatsHTTP           
+import requests                                               
 
+# Blueprint for game-related routes under /games
 bp = Blueprint('games', __name__, url_prefix='/games')
+
 
 @bp.route('/', methods=['GET'])
 def games_page():
-    # Determine the selected date (ISO) and display date
     date_param = request.args.get('date')
     try:
         if date_param:
@@ -21,41 +22,42 @@ def games_page():
         flash("Invalid date, defaulting to yesterday.")
         dt = datetime.now() - timedelta(days=1)
 
-    selected_date = dt.strftime('%Y-%m-%d')  # for the <input>
-    display_date  = dt.strftime('%d/%m/%Y')  # for the <h1>
-    game_date     = dt.strftime('%m/%d/%Y')  # for the NBA API
+    # Format dates for input value, display header, and NBA API
+    selected_date = dt.strftime('%Y-%m-%d')  
+    display_date  = dt.strftime('%d/%m/%Y')  
+    game_date     = dt.strftime('%m/%d/%Y')  
 
-    games = []
-    teams = get_all_teams()
-    headers = NBAStatsHTTP.headers
+    games = []                    
+    teams = get_all_teams()       
+    headers = NBAStatsHTTP.headers  # Required headers for NBA API requests
 
     try:
-        # Manual fetch to avoid WinProbability KeyError
+        # Fetch raw scoreboard data manually 
         url = 'https://stats.nba.com/stats/scoreboardv2'
         params = {'GameDate': game_date, 'LeagueID': '00'}
         resp = requests.get(url, headers=headers, params=params, timeout=15)
         data = resp.json()
 
-        # Extract GameHeader and LineScore
+        # Extract GameHeader and LineScore resultSets
         rs = data.get('resultSets', [])
         header_set = next((r for r in rs if r.get('name') == 'GameHeader'), None)
         line_set   = next((r for r in rs if r.get('name') == 'LineScore'), None)
         if not header_set or not line_set:
             raise ValueError('Missing GameHeader or LineScore in API response')
 
+        # Unpack headers and rows for each result set
         hdr_cols = header_set['headers']
         hdr_rows = header_set['rowSet']
         ln_cols  = line_set['headers']
         ln_rows  = line_set['rowSet']
 
-        # Build score map by GAME_ID and TEAM_ID
         scores = {}
         for lr in ln_rows:
             rec = dict(zip(ln_cols, lr))
             gid, tid = rec['GAME_ID'], rec['TEAM_ID']
             scores.setdefault(gid, {})[tid] = rec.get('PTS', 0)
 
-        # Construct games list
+        # Construct the games list with names, logos, scores, and status
         for hr in hdr_rows:
             rec = dict(zip(hdr_cols, hr))
             gid = rec['GAME_ID']
@@ -71,10 +73,13 @@ def games_page():
                 'GAME_STATUS_TEXT': rec.get('GAME_STATUS_TEXT'),
                 'GAME_TIME_EST':    rec.get('GAME_TIME_EST')
             })
+
     except (ReadTimeout, ValueError, requests.RequestException) as e:
+        # On error, flash a message including the display date and clear games
         flash(f"Could not load games for {display_date}: {e}")
         games = []
 
+    # Render the games page with the prepared data
     return render_template(
         'games.html',
         games=games,

@@ -3,7 +3,6 @@ import os
 import sys
 from requests.exceptions import ReadTimeout
 
-# ensure project root is on path, so we can import both scripts
 ROOT = os.path.abspath(os.path.join(__file__, ".."))
 sys.path.insert(0, ROOT)
 

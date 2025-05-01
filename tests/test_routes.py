@@ -72,10 +72,10 @@ def test_stat_trend_handles_no_games(monkeypatch, client):
     assert resp.status_code == 200
     # make sure the page still renders and includes a '0' projected value
     body = resp.get_data(as_text=True)
-    # your template prints projected value; look for "0" near that context
+    # template prints projected value; look for "0" near that context
     assert '0' in body
 
-# 3) projections_page: filtering by a team with no players yields an empty table
+# projections_page: filtering by a team with no players yields an empty table
 def test_projections_page_team_filter_no_matches(client):
     # pick a (very unlikely) team id to filter
     resp = client.get('/projections/?team=9999999')
@@ -85,7 +85,7 @@ def test_projections_page_team_filter_no_matches(client):
     tbody = html.split('<tbody>')[1].split('</tbody>')[0]
     assert '<tr>' not in tbody
 
-# 4) projections_page: simulate a timeout when fetching stats => flash + empty players
+# projections_page: simulate a timeout when fetching stats => flash + empty players
 def test_projections_page_handles_timeout(monkeypatch, client):
     from nba_api.stats.endpoints import leaguedashplayerstats
 
@@ -98,6 +98,6 @@ def test_projections_page_handles_timeout(monkeypatch, client):
     html = resp.get_data(as_text=True)
     # ensure your flash appears about load failure
     assert "Could not load player projections." in html
-    # also the table should render with no players
+    # the table should render with no players
     tbody = html.split('<tbody>')[1].split('</tbody>')[0]
     assert '<tr>' not in tbody

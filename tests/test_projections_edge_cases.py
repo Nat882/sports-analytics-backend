@@ -37,8 +37,8 @@ def test_stat_trend_zero_games(monkeypatch, client):
 
     res = client.get(url_for('projections.stat_trend', player_id=1234, stat='PTS'))
     html = res.get_data(as_text=True)
-    # we expect the template to at least contain our <canvas> or a specific placeholder
-    assert '<canvas' in html or 'No data' in html  # adjust to however you signal "no data"
+    # Expect the template to at least contain our <canvas> or a specific placeholder
+    assert '<canvas' in html or 'No data' in html  
 
 
 def test_projections_page_renders_controls(client):

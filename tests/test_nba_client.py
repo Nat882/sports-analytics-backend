@@ -22,4 +22,4 @@ def test_get_all_teams_returns_dict(monkeypatch):
 def test_get_all_teams_handles_timeout(monkeypatch):
     monkeypatch.setattr(LeagueDashTeamStats, '__init__', lambda *a,**k: (_ for _ in ()).throw(ReadTimeout()))
     teams = get_all_teams(season="2024-25")
-    assert teams == {}  # your client should return empty dict on timeout
+    assert teams == {}  # client should return empty dict on timeout

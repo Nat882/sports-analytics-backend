@@ -22,13 +22,12 @@
   .label {
     font-weight: bold;
   }
-  /* Style for the chart */
+  
   #playerComparisonChart {
     max-width: 800px;
     margin: 40px auto;
   }
 
-/* Fixed‑height chart wrapper */
 .chart-wrapper {
   position: relative;
   width: 100%;
@@ -37,7 +36,6 @@
   margin: 0 auto 40px;
 }
 
-/* Make any canvas inside fill the wrapper */
 .chart-wrapper canvas {
   position: absolute;
   top: 0;

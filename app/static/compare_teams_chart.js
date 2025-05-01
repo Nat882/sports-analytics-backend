@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const team1Stats = [team1.PTS, team1.REB, team1.AST, team1.TOV, team1.STL, team1.BLK];
     const team2Stats = [team2.PTS, team2.REB, team2.AST, team2.TOV, team2.STL, team2.BLK];
 
-    // ----- Stacked Bar Chart -----
+    // Stacked Bar Chart 
     const ctxBar = document.getElementById('teamComparisonChart').getContext('2d');
     const stackedBarChart = new Chart(ctxBar, {
       type: 'bar',

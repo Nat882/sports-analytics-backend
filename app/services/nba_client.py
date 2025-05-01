@@ -7,10 +7,6 @@ from nba_api.stats.endpoints import LeagueDashTeamStats
 from requests.exceptions import ReadTimeout
 
 def nba_api_setup():
-    """
-    Apply custom headers so the NBA API doesn’t block our requests.
-    Call this once when the app starts.
-    """
     NBAStatsHTTP.headers.update({
         'User-Agent': (
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -22,10 +18,6 @@ def nba_api_setup():
     })
 
 def get_current_season():
-    """
-    Return the current NBA season string, e.g. "2024-25".
-    If today is October or later, it’s the new season; otherwise it’s last year.
-    """
     now = datetime.datetime.now()
     if now.month >= 10:
         start = now.year

@@ -40,7 +40,7 @@ def test_filter_changes_chart(live_server, browser):
     url = f"{live_server.url}/projections/"
     browser.get(url)
     team_sel = browser.find_element("id", "teamSelector")
-    # pick the second team (if available)
+    # pick the second team 
     options = team_sel.find_elements("tag name", "option")
     if len(options) > 1:
         options[1].click()
